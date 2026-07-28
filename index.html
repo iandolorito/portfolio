@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,47 +7,68 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="page-glow glow-one"></div>
-    <div class="page-glow glow-two"></div>
+    <div class="grain"></div>
+    <div class="scroll-progress" id="scrollProgress"></div>
 
     <header>
-        <a class="portname" href="#Home" aria-label="Go to home">ID</a>
-        <nav aria-label="Primary navigation">
-            <ul>
-                <li><a href="#Home">Home</a></li>
-                <li><a href="#Projects">Projects</a></li>
-                <li><a href="#Skills">Skills</a></li>
-                <li><a href="#Experience">Experience</a></li>
-                <li><a href="#Contact">Contact</a></li>
-                <li><a href="#About">About</a></li>
-            </ul>
-        </nav>
+        <a class="portname" href="#Home" aria-label="Go to home">IAN</a>
+        <div class="header-right">
+            <nav aria-label="Primary navigation">
+                <ul>
+                    <li><a href="#Home">Home</a></li>
+                    <li><a href="#Projects">Projects</a></li>
+                    <li><a href="#Skills">Skills</a></li>
+                    <li><a href="#Github">GitHub</a></li>
+                    <li><a href="#Experience">Experience</a></li>
+                    <li><a href="#Contact">Contact</a></li>
+                    <li><a href="#About">About</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark or light mode">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4.2"></circle>
+                    <line x1="12" y1="1.5" x2="12" y2="3.8"></line>
+                    <line x1="12" y1="20.2" x2="12" y2="22.5"></line>
+                    <line x1="3.8" y1="3.8" x2="5.5" y2="5.5"></line>
+                    <line x1="18.5" y1="18.5" x2="20.2" y2="20.2"></line>
+                    <line x1="1.5" y1="12" x2="3.8" y2="12"></line>
+                    <line x1="20.2" y1="12" x2="22.5" y2="12"></line>
+                    <line x1="3.8" y1="20.2" x2="5.5" y2="18.5"></line>
+                    <line x1="18.5" y1="5.5" x2="20.2" y2="3.8"></line>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.5 14.5a8.5 8.5 0 1 1-9-13 7 7 0 0 0 9 13z"></path>
+                </svg>
+            </button>
+        </div>
     </header>
 
     <main>
         <section id="Home" class="hero">
+            <div class="spotlight" id="heroSpotlight"></div>
             <div class="section-inner hero-grid">
                 <div class="hero-copy reveal">
-                    <span class="eyebrow">Ian Dolorito / Developer</span>
+                    <span class="eyebrow">Ian Dolorito, Developer</span>
                     <h1>Hi, I'm Ian Dolorito.</h1>
                     <p>
-                        I am a 21-year-old developer focused on building responsive websites,
-                        mobile applications, and meaningful systems using modern web and app
-                        technologies.
+                        I am a 21-year-old developer focused on Backend and Frontend development, as well as Mobile App Development. I enjoy creating useful systems with clean design and smooth user experiences.
                     </p>
                     <div class="hero-meta">
-                        <span>Born January 16, 2005</span>
-                        <span>Ligao City, Philippines</span>
+                        <span>React</span>
+                        <span>JavaScript</span>
+                        <span>PHP</span>
+                        <span>Laravel</span>
+                        <span>Flutter</span>
                     </div>
                     <div class="hero-actions">
-                        <a class="btn primary" href="#Projects">View Work</a>
+                        <a class="btn primary" href="#Projects">Projects</a>
                         <a class="btn ghost" href="#Contact">Contact Me</a>
                     </div>
                 </div>
 
                 <div class="hero-visual reveal delay-one" aria-label="Ian Dolorito profile panel">
-                    <div class="profile-card">
-                        <img src="assets/ian.png" alt="Portrait of Ian Dolorito" class="profile-photo" onerror="this.style.display='none'">
+                    <div class="profile-card" id="profileCard">
+                        <img src="assets/poginiian.jpg" alt="Portrait of Ian Dolorito" class="profile-photo" onerror="this.style.display='none'">
                         <div class="avatar-fallback">ID</div>
                         <div class="profile-info">
                             <p class="profile-label">Web and Mobile Developer</p>
@@ -68,8 +89,8 @@
                 </div>
 
                 <div class="project-grid">
-                    <article class="project-card reveal">
-                        <span>01</span>
+                    <article class="project-card reveal tilt-card">
+                        <span>// 01</span>
                         <h3>Batang Handa</h3>
                         <p>
                             A mobile capstone project designed for children in Ligao City, teaching
@@ -78,14 +99,14 @@
                         </p>
                         <a href="#Experience">Explore</a>
                     </article>
-                    <article class="project-card reveal delay-one">
-                        <span>02</span>
+                    <article class="project-card reveal delay-one tilt-card">
+                        <span>// 02</span>
                         <h3>Modern Portfolio</h3>
                         <p>A responsive personal website with smooth scroll animations, polished sections, and clean visual presentation.</p>
                         <a href="#Home">Explore</a>
                     </article>
-                    <article class="project-card reveal delay-two">
-                        <span>03</span>
+                    <article class="project-card reveal delay-two tilt-card">
+                        <span>// 03</span>
                         <h3>Web System Practice</h3>
                         <p>Practice projects using PHP, Laravel, React, and database-driven interfaces for real-world workflows.</p>
                         <a href="#Skills">Explore</a>
@@ -118,6 +139,55 @@
             </div>
         </section>
 
+        <section id="Github">
+            <div class="section-inner">
+                <div class="section-heading reveal">
+                    <span class="eyebrow">Build Log</span>
+                    <h2>GitHub Activity</h2>
+                    <p>A live look at what I've been shipping and committing, pulled straight from GitHub.</p>
+                </div>
+
+                <div class="github-panel reveal delay-one">
+                    <p class="github-summary"><b id="ghTotal">&mdash;</b> contributions in <span id="ghYearLabel">&mdash;</span></p>
+
+                    <div class="github-body">
+                        <div class="heatmap-card">
+                            <div class="heatmap-scroll">
+                                <div class="heatmap-months" id="ghMonths"></div>
+                                <div class="heatmap-row">
+                                    <div class="heatmap-days">
+                                        <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
+                                    </div>
+                                    <div class="heatmap" id="ghHeatmap" aria-hidden="true"></div>
+                                </div>
+                            </div>
+                            <div class="heatmap-footer">
+                                <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/managing-contribution-graphs-on-your-profile/viewing-contributions-on-your-profile" target="_blank" rel="noopener">Learn how we count contributions</a>
+                                <div class="heatmap-legend">
+                                    <span>Less</span>
+                                    <span class="heatmap-cell" data-level="0"></span>
+                                    <span class="heatmap-cell" data-level="1"></span>
+                                    <span class="heatmap-cell" data-level="2"></span>
+                                    <span class="heatmap-cell" data-level="3"></span>
+                                    <span class="heatmap-cell" data-level="4"></span>
+                                    <span>More</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="year-tabs" id="ghYearTabs"></div>
+                            <a class="github-profile-link" id="ghProfileLink" href="https://github.com/" target="_blank" rel="noopener">View profile &rarr;</a>
+                        </div>
+                    </div>
+
+                    <p class="github-fallback" id="ghFallback" style="display:none;">
+                        Couldn't load live data right now &mdash; check the profile link above instead.
+                    </p>
+                </div>
+            </div>
+        </section>
+
         <section id="Experience">
             <div class="section-inner two-column">
                 <div class="section-heading reveal">
@@ -127,7 +197,7 @@
                 </div>
                 <div class="timeline reveal delay-one">
                     <div class="timeline-item">
-                        <span>In Development</span>
+                        <span>// In Development</span>
                         <h3>Capstone Project: Batang Handa</h3>
                         <p>
                             Developing Batang Handa, a mobile application for children that promotes disaster
@@ -137,7 +207,7 @@
                         </p>
                     </div>
                     <div class="timeline-item">
-                        <span>Portfolio</span>
+                        <span>// Portfolio</span>
                         <h3>Web Development Practice</h3>
                         <p>Creating responsive layouts, animated sections, and clean user interfaces using HTML, CSS, and JavaScript.</p>
                     </div>
@@ -168,6 +238,7 @@
                     <textarea id="message" name="message" rows="5" placeholder="Write your message here" required></textarea>
 
                     <button class="btn primary" type="submit">Send Message</button>
+                    <p class="form-status" id="formStatus"></p>
                 </form>
             </div>
         </section>
@@ -186,16 +257,8 @@
         </section>
     </main>
 
-    <script>
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.2 });
+    <div class="gh-tooltip" id="ghTooltip"></div>
 
-        document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
-    </script>
+    <script src="script.js" defer></script>
 </body>
 </html>

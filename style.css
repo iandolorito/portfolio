@@ -1,14 +1,41 @@
-:root {
-    --bg: #071014;
-    --surface: rgba(255, 255, 255, 0.08);
-    --surface-strong: rgba(255, 255, 255, 0.14);
-    --text: #f5f7f8;
-    --muted: #a8b4b8;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ============ THEME TOKENS ============ */
+:root,
+[data-theme="dark"] {
+    --bg: #060606;
+    --surface: rgba(255, 255, 255, 0.06);
+    --surface-strong: rgba(255, 255, 255, 0.13);
+    --text: #f4f4f2;
+    --muted: #8d8d8a;
     --line: rgba(255, 255, 255, 0.14);
-    --accent: #21c7a8;
-    --accent-two: #ffb84d;
-    --accent-three: #f76f8e;
-    --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+    --shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    --grain-opacity: 0.05;
+    --heat-0: #161b22;
+    --heat-1: #0e4429;
+    --heat-2: #006d32;
+    --heat-3: #26a641;
+    --heat-4: #39d353;
+    --gh-accent: #2f81f7;
+    --gh-accent-text: #ffffff;
+}
+
+[data-theme="light"] {
+    --bg: #f1f0ec;
+    --surface: rgba(0, 0, 0, 0.045);
+    --surface-strong: rgba(0, 0, 0, 0.09);
+    --text: #0b0b0a;
+    --muted: #63625c;
+    --line: rgba(0, 0, 0, 0.15);
+    --shadow: 0 24px 70px rgba(0, 0, 0, 0.14);
+    --grain-opacity: 0.035;
+    --heat-0: #ebedf0;
+    --heat-1: #9be9a8;
+    --heat-2: #40c463;
+    --heat-3: #30a14e;
+    --heat-4: #216e39;
+    --gh-accent: #0969da;
+    --gh-accent-text: #ffffff;
 }
 
 * {
@@ -24,13 +51,11 @@ html {
 body {
     min-height: 100vh;
     overflow-x: hidden;
-    background:
-        radial-gradient(circle at 15% 15%, rgba(33, 199, 168, 0.16), transparent 24rem),
-        radial-gradient(circle at 85% 20%, rgba(247, 111, 142, 0.16), transparent 22rem),
-        var(--bg);
+    background: var(--bg);
     color: var(--text);
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Inter', Arial, sans-serif;
     line-height: 1.6;
+    transition: background 320ms ease, color 320ms ease;
 }
 
 a {
@@ -38,35 +63,50 @@ a {
     text-decoration: none;
 }
 
-.page-glow {
+/* ============ GRAIN TEXTURE (signature backdrop) ============ */
+.grain {
     position: fixed;
+    inset: 0;
     z-index: -1;
-    width: 18rem;
-    height: 18rem;
-    border-radius: 50%;
-    filter: blur(24px);
-    opacity: 0.26;
-    animation: floatGlow 9s ease-in-out infinite;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.glow-one {
-    left: -5rem;
-    top: 12rem;
-    background: var(--accent);
+/* ============ CURSOR SPOTLIGHT (hero only) ============ */
+.spotlight {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 30%), var(--surface-strong), transparent 70%);
+    opacity: 0;
+    transition: opacity 400ms ease;
 }
 
-.glow-two {
-    right: -5rem;
-    bottom: 6rem;
-    background: var(--accent-three);
-    animation-delay: -3s;
+.hero:hover .spotlight {
+    opacity: 1;
 }
 
+/* ============ SCROLL PROGRESS ============ */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    height: 3px;
+    width: 0%;
+    background: var(--text);
+    transition: width 80ms linear;
+}
+
+/* ============ HEADER ============ */
 header {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 10;
+    z-index: 20;
     width: 100%;
     min-height: 72px;
     padding: 0 6vw;
@@ -74,8 +114,15 @@ header {
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--line);
-    background: rgba(7, 16, 20, 0.76);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
     backdrop-filter: blur(18px);
+    transition: background 320ms ease, border-color 320ms ease;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .portname {
@@ -87,9 +134,16 @@ header {
     border: 1px solid var(--line);
     border-radius: 50%;
     color: var(--text);
-    font-weight: 800;
-    letter-spacing: 0;
-    background: var(--surface);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 1.1rem;
+    transition: background 200ms ease, color 200ms ease;
+}
+
+.portname:hover {
+    background: var(--text);
+    color: var(--bg);
 }
 
 nav ul {
@@ -104,19 +158,82 @@ nav a {
     min-height: 38px;
     align-items: center;
     padding: 0 0.85rem;
+    border: 1px solid transparent;
     border-radius: 999px;
     color: var(--muted);
     font-size: 0.92rem;
-    transition: background 220ms ease, color 220ms ease, transform 220ms ease;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
-nav a:hover {
-    background: var(--surface);
+nav a:hover,
+nav a:focus-visible {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+}
+
+/* Theme toggle */
+.theme-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
     color: var(--text);
-    transform: translateY(-2px);
+    cursor: pointer;
+    overflow: hidden;
+    transition: background 200ms ease, color 200ms ease, transform 200ms ease;
 }
 
+.theme-toggle:hover {
+    background: var(--text);
+    color: var(--bg);
+    transform: rotate(14deg);
+}
+
+.theme-toggle svg {
+    width: 19px;
+    height: 19px;
+    transition: transform 420ms cubic-bezier(0.4, 0, 0.2, 1), opacity 320ms ease;
+}
+
+.icon-sun {
+    position: absolute;
+}
+
+.icon-moon {
+    position: absolute;
+}
+
+[data-theme="dark"] .icon-sun,
+:root:not([data-theme]) .icon-sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+[data-theme="dark"] .icon-moon,
+:root:not([data-theme]) .icon-moon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+[data-theme="light"] .icon-sun {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+[data-theme="light"] .icon-moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+}
+
+/* ============ LAYOUT ============ */
 section {
+    position: relative;
     min-height: 100vh;
     width: 100%;
     padding: 112px 6vw 72px;
@@ -125,6 +242,8 @@ section {
 }
 
 .section-inner {
+    position: relative;
+    z-index: 1;
     width: min(1120px, 100%);
     margin: 0 auto;
 }
@@ -137,20 +256,34 @@ section {
     align-items: center;
 }
 
+/* Eyebrow -- filled pill badge, the recurring signature mark */
 .eyebrow {
     display: inline-flex;
-    margin-bottom: 1rem;
-    color: var(--accent);
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1.1rem;
+    padding: 0.32rem 0.75rem;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+}
+
+.eyebrow::before {
+    content: "//";
+    opacity: 0.55;
 }
 
 h1,
 h2,
 h3 {
     line-height: 1.08;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
 }
 
 h1 {
@@ -164,6 +297,8 @@ h2 {
 
 h3 {
     font-size: 1.3rem;
+    font-family: 'Inter', Arial, sans-serif;
+    font-weight: 600;
 }
 
 p {
@@ -200,12 +335,20 @@ p {
     padding: 0 0.9rem;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--surface);
     color: var(--text);
-    font-size: 0.9rem;
-    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 200ms ease, color 200ms ease;
 }
 
+.hero-meta span:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+/* ============ BUTTONS -- negative fill-swap on interaction ============ */
 .btn,
 .contact-links a,
 .project-card a {
@@ -214,31 +357,45 @@ p {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    font-weight: 800;
-    transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
+    font-weight: 700;
+    border: 1px solid var(--line);
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease, transform 200ms ease;
 }
 
 .btn {
-    padding: 0 1.25rem;
-    border: 1px solid var(--line);
+    padding: 0 1.35rem;
 }
 
-.btn:hover,
-.contact-links a:hover,
-.project-card:hover {
-    transform: translateY(-4px);
+.btn:active,
+.contact-links a:active,
+.project-card a:active {
+    transform: scale(0.96);
 }
 
 .primary {
-    border-color: transparent;
-    background: var(--accent);
-    color: #04100d;
+    border-color: var(--text);
+    background: var(--text);
+    color: var(--bg);
+}
+
+.primary:hover,
+.primary:focus-visible {
+    background: transparent;
+    color: var(--text);
 }
 
 .ghost {
-    background: var(--surface);
+    background: transparent;
+    color: var(--text);
 }
 
+.ghost:hover,
+.ghost:focus-visible {
+    background: var(--text);
+    color: var(--bg);
+}
+
+/* ============ HERO VISUAL ============ */
 .hero-visual {
     min-height: 440px;
     display: grid;
@@ -256,9 +413,7 @@ p {
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background:
-        linear-gradient(145deg, rgba(33, 199, 168, 0.28), rgba(255, 184, 77, 0.13)),
-        var(--surface);
+    background: var(--surface);
     box-shadow: var(--shadow);
     animation: cardFloat 5s ease-in-out infinite;
 }
@@ -271,6 +426,13 @@ p {
     height: 100%;
     object-fit: cover;
     object-position: center top;
+    filter: grayscale(1) contrast(1.08);
+    transition: transform 500ms ease, filter 500ms ease;
+}
+
+.profile-card:hover .profile-photo {
+    transform: scale(1.045);
+    filter: grayscale(0.55) contrast(1.1);
 }
 
 .profile-card::after {
@@ -278,9 +440,7 @@ p {
     position: absolute;
     inset: 0;
     z-index: 2;
-    background:
-        linear-gradient(180deg, transparent 42%, rgba(7, 16, 20, 0.88) 100%),
-        linear-gradient(90deg, rgba(33, 199, 168, 0.16), rgba(247, 111, 142, 0.18));
+    background: linear-gradient(180deg, transparent 42%, var(--bg) 100%);
 }
 
 .avatar-fallback {
@@ -292,12 +452,13 @@ p {
     height: 132px;
     display: grid;
     place-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    border: 1px solid var(--line);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.13);
+    background: var(--surface);
     color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 4.5rem;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .profile-info {
@@ -306,19 +467,20 @@ p {
 }
 
 .profile-label {
-    color: var(--accent-two);
-    font-weight: 800;
-}
-
-.profile-card h2 {
-    margin-top: 0.4rem;
-    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    display: inline-flex;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
 }
 
 .orbit {
     position: absolute;
     z-index: 4;
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    border: 1px solid var(--line);
     border-radius: 50%;
     animation: spin 12s linear infinite;
 }
@@ -335,10 +497,11 @@ p {
     bottom: 92px;
     width: 82px;
     height: 82px;
-    border-color: rgba(255, 184, 77, 0.5);
     animation-duration: 8s;
+    animation-direction: reverse;
 }
 
+/* ============ PROJECTS ============ */
 .project-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -349,31 +512,40 @@ p {
 .project-card,
 .timeline-item,
 .contact-panel,
-.about-block {
+.about-block,
+.github-panel {
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface);
     box-shadow: var(--shadow);
+    transition: background 260ms ease, border-color 260ms ease;
 }
 
 .project-card {
+    position: relative;
     min-height: 310px;
     padding: 1.4rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 220ms ease, background 220ms ease, border-color 220ms ease;
+    transition: transform 120ms ease, border-color 220ms ease, background 220ms ease;
+    transform-style: preserve-3d;
+    will-change: transform;
 }
 
 .project-card:hover {
-    border-color: rgba(33, 199, 168, 0.5);
+    border-color: var(--muted);
     background: var(--surface-strong);
 }
 
 .project-card span,
 .timeline-item span {
-    color: var(--accent-two);
-    font-weight: 900;
+    display: inline-block;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
 }
 
 .project-card p {
@@ -384,9 +556,16 @@ p {
     width: max-content;
     min-height: 40px;
     padding: 0 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: var(--text);
 }
 
+.project-card a:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+/* ============ SKILLS ============ */
 .skills-list {
     display: flex;
     flex-wrap: wrap;
@@ -402,9 +581,246 @@ p {
     border-radius: 999px;
     background: var(--surface);
     color: var(--text);
-    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    transition: background 200ms ease, color 200ms ease, transform 200ms ease;
 }
 
+.skills-list span:hover {
+    background: var(--text);
+    color: var(--bg);
+    transform: translateY(-3px);
+}
+
+/* ============ GITHUB ============ */
+.github-panel {
+    margin-top: 2rem;
+}
+
+.github-summary {
+    margin-bottom: 1.4rem;
+    font-size: 1.15rem;
+    color: var(--text);
+}
+
+.github-summary b {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.3rem;
+}
+
+.github-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.heatmap-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.4rem 1rem;
+    transition: background 260ms ease, border-color 260ms ease;
+}
+
+.heatmap-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 4px 0.2rem;
+    margin: -4px -4px 0;
+}
+
+.heatmap-months {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 10px;
+    gap: 3px;
+    margin-left: 30px;
+    margin-bottom: 0.3rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    width: max-content;
+}
+
+.heatmap-row {
+    display: flex;
+    gap: 6px;
+    width: max-content;
+}
+
+.heatmap-days {
+    display: grid;
+    grid-template-rows: repeat(7, 10px);
+    gap: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.heatmap-days span {
+    display: flex;
+    align-items: center;
+}
+
+.heatmap {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, 10px);
+    gap: 3px;
+    width: max-content;
+}
+
+.heatmap-cell {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--heat-0);
+    position: relative;
+    transition: transform 120ms ease, outline-color 120ms ease;
+}
+
+.heatmap-cell[data-level="1"] { background: var(--heat-1); }
+.heatmap-cell[data-level="2"] { background: var(--heat-2); }
+.heatmap-cell[data-level="3"] { background: var(--heat-3); }
+.heatmap-cell[data-level="4"] { background: var(--heat-4); }
+
+.heatmap-cell.is-empty {
+    background: transparent;
+}
+
+.heatmap-cell:not(.is-empty):hover {
+    outline: 1px solid var(--text);
+    outline-offset: -1px;
+    transform: scale(1.15);
+    transform-origin: center;
+}
+
+.heatmap-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--line);
+}
+
+.heatmap-footer a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    border-bottom: 1px dashed var(--line);
+}
+
+.heatmap-footer a:hover {
+    color: var(--text);
+    border-color: var(--text);
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.heatmap-legend .heatmap-cell {
+    width: 10px;
+    height: 10px;
+}
+
+/* Year tabs -- deliberately borrows GitHub's own blue, isolated to this section */
+.year-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.year-tab {
+    min-width: 84px;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.year-tab:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+.year-tab.active {
+    background: var(--gh-accent);
+    border-color: var(--gh-accent);
+    color: var(--gh-accent-text);
+}
+
+.github-profile-link {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+}
+
+.github-profile-link:hover {
+    color: var(--text);
+    border-color: var(--text);
+}
+
+.gh-tooltip {
+    position: fixed;
+    z-index: 60;
+    padding: 0.4rem 0.65rem;
+    border-radius: 6px;
+    background: var(--text);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -130%);
+    transition: opacity 120ms ease;
+}
+
+.gh-tooltip.visible {
+    opacity: 1;
+}
+
+.github-fallback {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+@media (max-width: 700px) {
+    .github-body {
+        grid-template-columns: 1fr;
+    }
+
+    .year-tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+/* ============ EXPERIENCE ============ */
 .timeline {
     display: grid;
     gap: 1rem;
@@ -418,6 +834,7 @@ p {
     margin: 0.5rem 0;
 }
 
+/* ============ CONTACT ============ */
 .contact-grid {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
@@ -432,8 +849,13 @@ p {
 
 .contact-links a {
     padding: 0 1rem;
-    border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: var(--text);
+}
+
+.contact-links a:hover {
+    background: var(--text);
+    color: var(--bg);
 }
 
 .contact-form {
@@ -444,12 +866,14 @@ p {
     border-radius: 8px;
     background: var(--surface);
     box-shadow: var(--shadow);
+    transition: background 260ms ease, border-color 260ms ease;
 }
 
 .contact-form label {
     color: var(--text);
-    font-size: 0.88rem;
-    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
 }
 
 .contact-form input,
@@ -458,7 +882,7 @@ p {
     border: 1px solid var(--line);
     border-radius: 8px;
     outline: none;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface);
     color: var(--text);
     font: inherit;
     transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
@@ -477,24 +901,32 @@ p {
 
 .contact-form input::placeholder,
 .contact-form textarea::placeholder {
-    color: rgba(168, 180, 184, 0.7);
+    color: var(--muted);
+    opacity: 0.8;
 }
 
 .contact-form input:focus,
 .contact-form textarea:focus {
-    border-color: rgba(33, 199, 168, 0.72);
-    background: rgba(255, 255, 255, 0.11);
-    box-shadow: 0 0 0 4px rgba(33, 199, 168, 0.12);
+    border-color: var(--text);
+    box-shadow: 0 0 0 3px var(--surface-strong);
 }
 
 .contact-form button {
     width: max-content;
     min-width: 160px;
-    border: 0;
+    border: 1px solid var(--text);
     cursor: pointer;
     font: inherit;
 }
 
+.form-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    min-height: 1.2em;
+}
+
+/* ============ REVEAL ANIMATION ============ */
 .reveal {
     opacity: 0;
     transform: translateY(28px);
@@ -514,29 +946,21 @@ p {
     transition-delay: 240ms;
 }
 
-@keyframes floatGlow {
-    0%,
-    100% {
-        transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-        transform: translate3d(24px, -20px, 0) scale(1.08);
-    }
-}
-
 @keyframes cardFloat {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-14px);
-    }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
     }
 }
 
@@ -547,6 +971,11 @@ p {
         align-items: flex-start;
         gap: 0.8rem;
         flex-direction: column;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
     }
 
     nav {
@@ -581,6 +1010,10 @@ p {
 
     .profile-card {
         aspect-ratio: 1;
+    }
+
+    .github-stats {
+        gap: 1.4rem;
     }
 }
 
