@@ -6,23 +6,96 @@
     root.classList.add('js');
     const themeToggle = document.getElementById('themeToggle');
 
-    // Storage is optional: restricted browsing must not break the page.
-    function applyTheme(theme) {
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const themeMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    let themeTimer;
+    let themeTransition;
+    let queuedTheme;
+    let themeRevision = 0;
+    function readSavedTheme() {
+        try {
+            const saved = localStorage.getItem('ian-portfolio-theme');
+            return saved === 'dark' || saved === 'light' ? saved : null;
+        } catch (_) { return null; /* Storage is optional. */ }
+    }
+    let savedTheme = readSavedTheme();
+    function preferredTheme() {
+        return savedTheme || (systemTheme.matches ? 'dark' : 'light');
+    }
+    function renderTheme(theme) {
         root.dataset.theme = theme;
-        const themeColor = document.querySelector('meta[name="theme-color"]');
-        if (themeColor) themeColor.content = theme === 'dark' ? '#10141d' : '#f7f9fc';
+        if (themeColor) themeColor.content = getComputedStyle(root).getPropertyValue('--bg').trim();
         if (themeToggle) {
             themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
-            themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} colors`);
+            const label = `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`;
+            themeToggle.setAttribute('aria-label', label);
+            themeToggle.title = label;
         }
     }
-    let savedTheme;
-    try { savedTheme = localStorage.getItem('ian-portfolio-theme'); } catch (_) { /* Optional preference. */ }
-    applyTheme(savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : root.dataset.theme || 'light');
+    function applyTheme(theme, animate = false) {
+        if (themeTransition) {
+            if (animate && !themeMotion.matches) {
+                queuedTheme = theme;
+                return;
+            }
+            themeTransition.skipTransition();
+            themeTransition = null;
+        }
+        queuedTheme = null;
+        window.clearTimeout(themeTimer);
+        root.classList.remove('theme-changing', 'theme-crossfade');
+        const revision = ++themeRevision;
+        if (!animate || themeMotion.matches || theme === root.dataset.theme) {
+            renderTheme(theme);
+            return;
+        }
+        if (typeof document.startViewTransition === 'function') {
+            root.classList.add('theme-crossfade');
+            const transition = document.startViewTransition(() => {
+                if (revision === themeRevision) renderTheme(theme);
+            });
+            themeTransition = transition;
+            // A skipped capture can reject ready even though its update still completes.
+            transition.ready.catch(() => {});
+            transition.finished.catch(() => {}).then(() => {
+                if (themeTransition !== transition) return;
+                themeTransition = null;
+                root.classList.remove('theme-crossfade');
+                const nextTheme = queuedTheme;
+                queuedTheme = null;
+                if (nextTheme) applyTheme(nextTheme, true);
+            });
+        } else {
+            root.classList.add('theme-changing');
+            // Establish the starting colors before changing them in older browsers.
+            void root.offsetWidth;
+            renderTheme(theme);
+            themeTimer = window.setTimeout(() => root.classList.remove('theme-changing'), 850);
+        }
+    }
+    applyTheme(preferredTheme());
     themeToggle?.addEventListener('click', () => {
-        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        try { localStorage.setItem('ian-portfolio-theme', next); } catch (_) { /* Keep the session preference. */ }
+        savedTheme = (savedTheme || root.dataset.theme) === 'dark' ? 'light' : 'dark';
+        applyTheme(savedTheme, true);
+        try { localStorage.setItem('ian-portfolio-theme', savedTheme); } catch (_) { /* Keep the session preference. */ }
+    });
+    systemTheme.addEventListener('change', () => {
+        if (!savedTheme) applyTheme(preferredTheme(), true);
+    });
+    window.addEventListener('storage', (event) => {
+        if (event.key !== 'ian-portfolio-theme' && event.key !== null) return;
+        savedTheme = readSavedTheme();
+        applyTheme(preferredTheme(), true);
+    });
+    window.addEventListener('pageshow', () => {
+        savedTheme = readSavedTheme();
+        applyTheme(preferredTheme());
+    });
+    themeMotion.addEventListener('change', () => {
+        if (themeMotion.matches) {
+            applyTheme(preferredTheme());
+        }
     });
 
     const menuToggle = document.getElementById('menuToggle');
@@ -574,5 +647,78 @@
             }, { rootMargin: '240px' });
             githubObserver.observe(section);
         } else loadGithub();
+    }
+    // Replay scroll reveals after content leaves the viewport, with room to avoid edge jitter.
+    const scrollMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if ('IntersectionObserver' in window) {
+        const revealSelector = [
+            '.section-heading', '.toolkit-intro', '.skill-group', '.about-copy',
+            '.journey-heading', '.journey-item', '.journey-note',
+            '.education-current', '.education-history > li', '.education-awards-heading',
+            '.certificate-card', '.project', '.github-panel', '.contact-copy', '.contact-form',
+            '.footer-profile', '.footer-column', '.footer-bottom'
+        ].join(',');
+        const revealTargets = [...document.querySelectorAll(revealSelector)]
+            .filter((element) => !element.parentElement?.closest(revealSelector));
+        const pendingReveals = new Set();
+        let revealObserver;
+        let resetObserver;
+        function prepareReveal(element) {
+            if (element.contains(document.activeElement)) return;
+            element.classList.remove('is-revealing');
+            element.classList.add('is-pending');
+            pendingReveals.add(element);
+        }
+        function revealElement(element, animate = true) {
+            if (!pendingReveals.delete(element)) return;
+            element.classList.remove('is-pending');
+            if (animate && !scrollMotionPreference.matches && !element.contains(document.activeElement)) {
+                element.classList.add('is-revealing');
+            }
+        }
+        function configureScrollMotion() {
+            revealObserver?.disconnect();
+            resetObserver?.disconnect();
+            pendingReveals.clear();
+            revealTargets.forEach((element) => element.classList.remove('is-pending', 'is-revealing'));
+            if (scrollMotionPreference.matches) return;
+            revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) revealElement(entry.target);
+                });
+            }, { rootMargin: '-24px 0px -24px 0px', threshold: 0.06 });
+            resetObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting && entry.boundingClientRect.height > 0) prepareReveal(entry.target);
+                });
+            }, { rootMargin: '96px 0px 96px 0px', threshold: 0 });
+            revealTargets.forEach((element) => {
+                const bounds = element.getBoundingClientRect();
+                const siblings = [...element.parentElement.children].filter((sibling) => sibling.matches(revealSelector));
+                const index = Math.max(0, siblings.indexOf(element));
+                const card = element.matches('.project, .certificate-card, .skill-group, .footer-column');
+                const timeline = element.matches('.journey-item, .education-history > li');
+                const cardOffset = element.matches('.skill-group') ? 8 : 12;
+                element.style.setProperty('--reveal-delay', `${Math.min(index, 2) * 65}ms`);
+                element.style.setProperty('--reveal-x', card ? `${index % 2 ? cardOffset : -cardOffset}px` : timeline ? '-12px' : '0px');
+                element.style.setProperty('--reveal-y', card || timeline ? '12px' : '24px');
+                element.classList.add('scroll-reveal');
+                // Leave the initial viewport visible, including content reached by an anchor.
+                if (bounds.top >= window.innerHeight || bounds.bottom <= 0) prepareReveal(element);
+                revealObserver.observe(element);
+                resetObserver.observe(element);
+            });
+        }
+        configureScrollMotion();
+        document.addEventListener('focusin', (event) => {
+            const target = event.target.closest?.('.scroll-reveal');
+            if (!target) return;
+            revealElement(target, false);
+            target.classList.remove('is-revealing');
+        });
+        document.addEventListener('animationend', (event) => {
+            if (event.animationName === 'scroll-reveal-in') event.target.classList.remove('is-revealing');
+        });
+        scrollMotionPreference.addEventListener('change', configureScrollMotion);
     }
 })();
